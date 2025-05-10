@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mighty GIS Tutorials</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      background: #f0f0f0;
+      position: relative;
+      cursor: none; /* Hide native cursor by default */
+    }
+    .container {
+      display: flex;
+      flex-direction: row;
+      height: calc(100vh - 100px); /* Adjust for ticker and YouTube stats */
+      flex-wrap: wrap;
+    }
+    .section {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      min-width: 300px;
+      position: relative;
+    }
+    .left {
+      background: #fcf800;
+      clip-path: polygon(0 0, 85% 0, 100% 50%, 85% 100%, 0 100%);
+      overflow: hidden;
+    }
+    .center {
+      background: #6aff00;
+      clip-path: polygon(0 0, 100% 0, 85% 50%, 100% 100%, 0 100%);
+    }
+    .right {
+      background: #ffa600;
+      clip-path: polygon(15% 0, 100% 0, 100% 100%, 15% 100%, 0 50%);
+    }
+    .welcome-text {
+      text-align: center;
+      color: #ff0000;
+      line-height: 1.5;
+      text-shadow: 1px 1px 2px rgb(64, 178, 26);
+      z-index: 1;
+    }
+    .welcome-text span:nth-child(1) {
+        font-size: 40px;
+      }
+      .welcome-text span:nth-child(2) {
+        font-size: 46px;
+      }
+      .welcome-text span:nth-child(3) {
+        font-size: 20px;
+      }
+    .ticker {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: hsl(0, 100%, 50%);
+      color: #fff;
+      font-size: 60px;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+    .ticker span {
+      display: inline-block;
+      padding-left: 100%;
+      animation: ticker 15s linear infinite;
+    }
+    @keyframes ticker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    /* YouTube Stats Display */
+    .youtube-stats {
+      position: fixed;
+      bottom: 80px; /* Above ticker */
+      width: 100%;
+      max-width: 600px;
+      max-height: 200px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: linear-gradient(45deg, rgba(0, 0, 0, 0.7), rgba(46, 204, 113, 0.3));
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+      animation: glow 3s ease-in-out infinite;
+      z-index: 5;
+    }
+    .youtube-logo {
+      width: 8px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+    }
+    .youtube-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      font-size: 1.8vw;
+      width: 100%;
+      text-align: center;
+    }
+    .box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 2px solid #fff;
+      padding: 10px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.2),rgba(255, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .box:hover {
+      transform: scale(1.05);
+    }
+    .value {
+      font-weight: bold;
+      color: #e74c3c;
+      text-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+    }
+    .label {
+      font-weight: 500;
+      color: #3498db;
+    }
+    .youtube-link {
+      margin-top: 12px;
+      padding: 10px 20px;
+      font-size: 1.5vw;
+      cursor: pointer;
+      background: linear-gradient(90deg, #e74c3c, #c0392b,#95ff00);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+    .youtube-link:hover {
+      background: linear-gradient(90deg, #c0392b, #a93226);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.5);
+    }
+    video {
+      width: 100%;
+      max-width: 400px;
+      background: black;
+      display: none;
+      border-radius: 8px;
+    }
+    .recorder-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+    .recorder-controls button,
+    .recorder-controls select {
+      font-size: 16px;
+      margin: 5px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    }
+    .recorder-controls button {
+      background: linear-gradient(90deg, #e74c3c, #c0392b);
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .recorder-controls button:hover {
+      background: linear-gradient(90deg, #c0392b, #a93226);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.4);
+    }
+    .recorder-controls button:disabled {
+      background: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .recorder-controls select {
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      padding: 10px;
+      font-weight: 500;
+    }
+    #downloadLink {
+      text-decoration: none;
+      color: #2ecc71;
+      font-weight: bold;
+      padding: 10px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+    #downloadLink:hover {
+      background: rgba(46, 204, 113, 0.1);
+    }
+    #countdownCanvas {
+      margin-top: 12px;
+      display: none;
+      box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+    }
+    .menu-icon {
+      position: absolute;
+      top: 10px;
+      right: -19px;
+      cursor: pointer;
+      font-size: 24px;
+    }
+    .menu {
+      position: absolute;
+      top: 40px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #bdc3c7;
+      border-radius: 5px;
+      padding: 10px;
+      display: none;
+      z-index: 10;
+    }
+    .menu label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 14px;
+      color: #34495e;
+      margin-bottom: 5px;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.6;
+      pointer-events: none;
+      animation: float 10s infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(0); opacity: 0.6; }
+      50% { transform: translateY(-20px); opacity: 0.3; }
+      100% { transform: translateY(0); opacity: 0.6; }
+    }
+    .flying-emoji {
+      position: fixed;
+      font-size: 74px;
+      pointer-events: none;
+      animation: flyAcross 5s linear infinite;
+    }
+    @keyframes flyAcross {
+      0% { transform: translateX(-100vw); }
+      100% { transform: translateX(100vw); }
+    }
+    /* Corner Element Styles */
+    .corner-element {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      font-weight: bold;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      z-index: 2;
+    }
+    .corner-element.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .corner-dot {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 10px;
+      height: 10px;
+      background: #e74c3c;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 3;
+    }
+    /* Rotating Globe Styles */
+    .rotating-globe {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 90px;
+      animation: spin 10s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(720deg); }
+    }
+    /* Mouse Cursor Styles */
+    .custom-cursor {
+      position: fixed;
+      width: 28px;
+      height: 28px;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28"><path d="M3 3l18 18-9-9-6 6-3-3 6-6-9-9z" fill="white" stroke="black" stroke-width="2"/></svg>') no-repeat center;
+      background-size: contain;
+      pointer-events: none;
+      transform: scale(1.8); /* Enlarged */
+      display: none;
+      z-index: 1000;
+    }
+    .cursor-trail {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: rgba(231, 76, 60, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: fade 0.5s ease-out forwards;
+      z-index: 999;
+    }
+    @keyframes fade {
+      0% { opacity: 0.5; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0); }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.05); }
+    }
+    @keyframes glow {
+      0% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
+      50% { box-shadow: 0 0 30px rgba(231, 76, 60, 0.7); }
+      100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: auto;
+      }
+      .section {
+        clip-path: none;
+        padding: 25px 15px;
+      }
+      .welcome-text span:nth-child(1) {
+        font-size: 20px;
+      }
+      .welcome-text span:nth-child(2) {
+        font-size: 16px;
+      }
+      .welcome-text span:nth-child(3) {
+        font-size: 18px;
+      }
+      .ticker {
+        font-size: 40px;
+      }
+      .youtube-stats {
+        bottom: 60px;
+        max-width: 90%;
+        padding: 10px;
+      }
+      .youtube-logo {
+        width: 60px;
+      }
+      .youtube-stats-grid {
+        font-size: 3.2vw;
+        gap: 8px;
+      }
+      .youtube-link {
+        font-size: 2.8vw;
+        padding: 8px 16px;
+      }
+      .recorder-controls button,
+      .recorder-controls select {
+        font-size: 14px;
+        padding: 10px 20px;
+      }
+      #countdownCanvas {
+        width: 100px !important;
+        height: 100px !important;
+      }
+      .rotating-globe {
+        font-size: 60px;
+      }
+      .custom-cursor {
+        width: 24px;
+        height: 24px;
+        transform: scale(1.5);
+      }
+      .cursor-trail {
+        width: 8px;
+        height: 8px;
+      }
+    }
+  </style>
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.11.1/dist/ffmpeg.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="section left" id="sectionA">
+      <div class="corner-dot" onclick="toggleCorner('corner-left')"></div>
+      <div class="corner-element" id="corner-left">Celestakim_GIS</div>
+      <div class="welcome-text">
+        <span>❝ Welcome to Mighty GIS Tutorials by Celestakim ❝</span><br>
+        <span>GIS Enthusiast from University of Technology</span><br>
+        <span style="
+          font-size: 40px;
+          font-weight: 800;
+          color: #ffffff;
+          font-family: 'Poppins', sans-serif;
+          text-transform: uppercase;
+          letter-spacing: 4px;
+          display: inline-block;
+          padding: 12px 24px;
+          border-radius: 12px;
+          background: linear-gradient(90deg, #0047AB 0%, #008CFF 100%);
+          box-shadow: 0 0 20px rgba(0, 140, 255, 0.6);
+          text-align: center;
+          animation: pulse 1.5s infinite alternate;
+        ">
+          👍Stay Tuned!
+        </span>
+      </div>
+    </div>
+
+    <div class="section center">
+      <div class="corner-dot" onclick="toggleCorner('corner-center')"></div>
+      <div class="corner-element" id="corner-center">Celestakim_GIS</div>
+      <div class="recorder-controls">
+        <div class="menu-icon" onclick="toggleMenu()">☰</div>
+        <div class="menu" id="menu">
+          <label><input type="checkbox" id="externalSound"> External Sound</label>
+          <label><input type="checkbox" id="internalSound"> Internal Sound</label>
+          <label><input type="checkbox" id="micSound"> Microphone</label>
+          <label><input type="checkbox" id="useFrontCamera" checked> Use Front Camera</label>
+        </div>
+        <button id="startWebcam" title="Webcam">🎥 Start Webcam</button>
+        <button id="startScreen" title="Screen">🖥️ Start Screen</button>
+        <button id="toggleCursor" title="Toggle Cursor">🖱️ Cursor</button>
+        <button id="pauseRecording" title="Pause" disabled>⏸️ Pause</button>
+        <button id="resumeRecording" title="Resume" disabled>▶️ Resume</button>
+        <button id="stopRecording" title="Stop" disabled>⏹️ Stop</button>
+        <select id="format">
+          <option value="webm">webm</option>
+          <option value="mp4">mp4</option>
+        </select>
+        <a id="downloadLink" style="display:none">💾 Download</a>
+        <canvas id="countdownCanvas" width="150" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="section right">
+      <div class="corner-dot" onclick="toggleCorner('corner-right')"></div>
+      <div class="corner-element" id="corner-right">Celestakim_GIS</div>
+      <div class="rotating-globe">🌍</div>
+      <video id="preview" autoplay muted playsinline></video>
+    </div>
+  </div>
+
+  <div class="youtube-stats">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/42/YouTube_icon_%282013-2017%29.png" alt="YouTube" class="youtube-logo">
+    <div class="youtube-stats-grid">
+      <div class="box value">
+        <div id="subscribers">Loading...</div>
+      </div>
+      <div class="box label">subscribers+</div>
+      <div class="box value">
+        <div id="viewers">Loading...</div>
+      </div>
+      <div class="box label">viewers+</div>
+    </div>
+    <a href="https://www.youtube.com/@CELESTAKIM_GIS" target="_blank" class="youtube-link">Follow</a>
+  </div>
+
+  <div class="ticker"><span>Please Like 👍 Share 🔗 Comment 💬 and Subscribe 🔔             ~ ~ ~ ~        WHERE ARE YOU GETTING AS FROM?</span></div>
+
+  <div class="custom-cursor" id="customCursor"></div>
+
+  <script>
+    let mediaRecorder;
+    let recordedChunks = [];
+    let stream;
+    let isCursorVisible = false;
+    const preview = document.getElementById('preview');
+    const startWebcamBtn = document.getElementById('startWebcam');
+    const startScreenBtn = document.getElementById('startScreen');
+    const toggleCursorBtn = document.getElementById('toggleCursor');
+    const pauseBtn = document.getElementById('pauseRecording');
+    const resumeBtn = document.getElementById('resumeRecording');
+    const stopBtn = document.getElementById('stopRecording');
+    const downloadLink = document.getElementById('downloadLink');
+    const formatSelect = document.getElementById('format');
+    const countdownCanvas = document.getElementById('countdownCanvas');
+    const customCursor = document.getElementById('customCursor');
+    const externalSound = document.getElementById('externalSound');
+    const internalSound = document.getElementById('internalSound');
+    const micSound = document.getElementById('micSound');
+    const useFrontCamera = document.getElementById('useFrontCamera');
+    const menu = document.getElementById('menu');
+
+    // Toggle Menu
+    function toggleMenu() {
+      menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // Toggle Corner Element
+    function toggleCorner(id) {
+      const element = document.getElementById(id);
+      element.classList.toggle('visible');
+    }
+
+    // Particle Effect in Left Section
+    function createParticles() {
+      const sectionA = document.getElementById('sectionA');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.width = Math.random() * 10 + 5 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 5 + 's';
+        sectionA.appendChild(particle);
+      }
+    }
+
+    // Flying Emojis for Like, Share, Comment, Subscribe
+    function createFlyingEmojis() {
+      const emojis = ['👍', '🔗', '💬', '🔔'];
+      for (let i = 0; i < 10; i++) {
+        const emoji = document.createElement('div');
+        emoji.className = 'flying-emoji';
+        emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        emoji.style.top = Math.random() * 80 + 10 + 'vh';
+        emoji.style.animationDelay = Math.random() * 5 + 's';
+        document.body.appendChild(emoji);
+      }
+    }
+
+    // YouTube Data Fetching
+    async function fetchYouTubeData() {
+      const apiKey = 'AIzaSyB4bf5IisfWxmgdKcZJDqkdI1nJKvSHoLQ';
+      const channelId = 'UCv1iHC3RNcL3lvMWKY4wfZA';
+      const url = `https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${channelId}&key=${apiKey}`;
+      
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        const subscribers = data.items[0].statistics.subscriberCount;
+        const views = data.items[0].statistics.viewCount;
+        
+        animateCount('subscribers', subscribers);
+        animateCount('viewers', views);
+      } catch (error) {
+        console.error('Error fetching YouTube data:', error);
+        document.getElementById('subscribers').innerText = 'Error';
+        document.getElementById('viewers').innerText = 'Error';
+      }
+    }
+
+    function animateCount(id, count) {
+      const element = document.getElementById(id);
+      let start = 0;
+      const end = parseInt(count);
+      const duration = 20000;
+      const increment = end / (duration / 100);
+
+      function updateCount() {
+        start += increment;
+        if (start < end) {
+          element.innerText = Math.ceil(start);
+          setTimeout(updateCount, 100);
+        } else {
+          element.innerText = end.toLocaleString();
+        }
+      }
+
+      updateCount();
+    }
+
+    // Canvas Countdown Animation
+    function drawCountdown(seconds) {
+      const ctx = countdownCanvas.getContext('2d');
+      const width = countdownCanvas.width;
+      const height = countdownCanvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = width / 2 - 10;
+
+      // Clear canvas
+      ctx.clearRect(0, 0, width, height);
+
+      // Draw background circle
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fill();
+
+      // Draw progress arc
+      const progress = seconds / 5;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius - 5, -Math.PI / 2, (-Math.PI / 2) + (2 * Math.PI * progress));
+      ctx.lineWidth = 10;
+      ctx.strokeStyle = '#e74c3c';
+      ctx.stroke();
+
+      // Draw countdown text
+      ctx.font = 'bold 30px Montserrat';
+      ctx.fillStyle = '#fff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(seconds, centerX, centerY - 20);
+
+      // Draw YouTube channel name
+      ctx.font = 'bold 14px Montserrat';
+      ctx.fillStyle = '#fff';
+      ctx.fillText('@CELESTAKIM_GIS', centerX, centerY + 20);
+    }
+
+    async function startCountdown(callback) {
+      let countdown = 5;
+      countdownCanvas.style.display = 'block';
+      startWebcamBtn.disabled = true;
+      startScreenBtn.disabled = true;
+
+      drawCountdown(countdown);
+
+      const timer = setInterval(() => {
+        countdown--;
+        drawCountdown(countdown);
+        if (countdown < 0) {
+          clearInterval(timer);
+          countdownCanvas.style.display = 'none';
+          startWebcamBtn.disabled = false;
+          startScreenBtn.disabled = false;
+          callback();
+        }
+      }, 1000);
+    }
+
+    // Mouse Cursor Toggle
+    function toggleCursor() {
+      isCursorVisible = !isCursorVisible;
+      customCursor.style.display = isCursorVisible ? 'block' : 'none';
+      toggleCursorBtn.textContent = isCursorVisible ? '🖱️ Hide Cursor' : '🖱️ Show Cursor';
+    }
+
+    // Cursor Trail Effect
+    document.addEventListener('mousemove', (e) => {
+      if (isCursorVisible) {
+        customCursor.style.left = `${e.clientX}px`;
+        customCursor.style.top = `${e.clientY}px`;
+        
+        // Create trail dot
+        const trail = document.createElement('div');
+        trail.className = 'cursor-trail';
+        trail.style.left = `${e.clientX}px`;
+        trail.style.top = `${e.clientY}px`;
+        document.body.appendChild(trail);
+        setTimeout(() => trail.remove(), 500);
+      }
+    });
+
+    async function startRecording(captureStream, showPreview = false) {
+      stream = captureStream;
+      if (showPreview) {
+        preview.srcObject = stream;
+        preview.style.display = 'block';
+      } else {
+        preview.srcObject = null;
+        preview.style.display = 'none';
+      }
+
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) recordedChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        preview.src = url;
+        preview.controls = true;
+        preview.style.display = 'block';
+
+        if (formatSelect.value === 'mp4') {
+          const { createFFmpeg, fetchFile } = FFmpeg;
+          const ffmpeg = createFFmpeg({ log: true });
+          if (!ffmpeg.isLoaded()) await ffmpeg.load();
+          const inputName = 'input.webm';
+          const outputName = 'output.mp4';
+          ffmpeg.FS('writeFile', inputName, await fetchFile(blob));
+          await ffmpeg.run('-i', inputName, '-c:v', 'libx264', '-c:a', 'aac', outputName);
+          const data = ffmpeg.FS('readFile', outputName);
+          const mp4Blob = new Blob([data.buffer], { type: 'video/mp4' });
+          const mp4Url = URL.createObjectURL(mp4Blob);
+          downloadLink.href = mp4Url;
+          downloadLink.download = 'recording.mp4';
+        } else {
+          downloadLink.href = url;
+          downloadLink.download = 'recording.webm';
+        }
+        downloadLink.style.display = 'inline-block';
+        downloadLink.textContent = '💾 Download';
+      };
+
+      mediaRecorder.start();
+      stopBtn.disabled = false;
+      pauseBtn.disabled = false;
+    }
+
+    startWebcamBtn.onclick = async () => {
+      startCountdown(async () => {
+        const audioConstraints = { audio: micSound.checked };
+        const facingMode = useFrontCamera.checked ? 'user' : 'environment';
+        const videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { facingMode }, 
+          ...audioConstraints 
+        });
+        await startRecording(videoStream, true);
+      });
+    };
+
+    startScreenBtn.onclick = async () => {
+      startCountdown(async () => {
+        try {
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: true,
+            audio: internalSound.checked
+          });
+          let combinedStream = screenStream;
+          
+          if (micSound.checked || externalSound.checked) {
+            const micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            combinedStream = new MediaStream([
+              ...screenStream.getVideoTracks(),
+              ...screenStream.getAudioTracks(),
+              ...micStream.getAudioTracks()
+            ]);
+          }
+          await startRecording(combinedStream, false);
+        } catch (err) {
+          alert("Error: " + err.message);
+          countdownCanvas.style.display = 'none';
+          startWebcamBtn.disabled = false;
+          startScreenBtn.disabled = false;
+        }
+      });
+    };
+
+    toggleCursorBtn.onclick = toggleCursor;
+
+    pauseBtn.onclick = () => {
+      mediaRecorder.pause();
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = false;
+    };
+
+    resumeBtn.onclick = () => {
+      mediaRecorder.resume();
+      pauseBtn.disabled = false;
+      resumeBtn.disabled = true;
+    };
+
+    stopBtn.onclick = () => {
+      mediaRecorder.stop();
+      stream.getTracks().forEach(track => track.stop());
+      stopBtn.disabled = true;
+      pauseBtn.disabled = true;
+      resumeBtn.disabled = true;
+      isCursorVisible = false;
+      customCursor.style.display = 'none';
+      toggleCursorBtn.textContent = '🖱️ Show Cursor';
+    };
+
+    // Initialize
+    window.onload = () => {
+      createParticles();
+      createFlyingEmojis();
+      fetchYouTubeData();
+    };
+  </script>
+</body>
+</html>
